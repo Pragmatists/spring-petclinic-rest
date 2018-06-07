@@ -26,10 +26,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.tomcat.jni.Local;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -147,6 +150,20 @@ public class VisitRestControllerTests {
         	.andExpect(jsonPath("$.[0].description").value("rabies shot"))
         	.andExpect(jsonPath("$.[1].id").value(3))
         	.andExpect(jsonPath("$.[1].description").value("neutered"));
+    }
+
+    @Test
+    public void testGetVisitsScheduledForGivenDaySuccess() throws Exception {
+        LocalDate date = LocalDate.of(2018, 6, 6);
+        given(this.clinicService.findVisits(date)).willReturn(visits);
+        this.mockMvc.perform(get("/api/visits?date=2018-06-06")
+            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType("application/json;charset=UTF-8"))
+            .andExpect(jsonPath("$.[0].id").value(2))
+            .andExpect(jsonPath("$.[0].description").value("rabies shot"))
+            .andExpect(jsonPath("$.[1].id").value(3))
+            .andExpect(jsonPath("$.[1].description").value("neutered"));
     }
 
     @Test

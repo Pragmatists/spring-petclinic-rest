@@ -35,6 +35,7 @@ import javax.sql.DataSource;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.ZoneId;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -101,7 +102,7 @@ public class JdbcVisitRepositoryImpl implements VisitRepository {
 
         return visits;
     }
-    
+
 	@Override
 	public Visit findById(int id) throws DataAccessException {
 		Visit visit;
@@ -145,7 +146,18 @@ public class JdbcVisitRepositoryImpl implements VisitRepository {
 		this.namedParameterJdbcTemplate.update("DELETE FROM visits WHERE id=:id", params);
 	}
 
-	protected class JdbcVisitRowMapperExt implements RowMapper<Visit> {
+    @Override
+    public Collection<Visit> findByDate(Date date) {
+        // FIXME: local date, but on for server side only. What if we want to use client lcoation?
+        Map<String, Object> params = new HashMap<>();
+        params.put("visitDate", date);
+        return this.namedParameterJdbcTemplate.query(
+            "SELECT id as visit_id, pets.id as pets_id, visit_date, description FROM visits LEFT JOIN pets ON visits.pet_id = pets.id WHERE visit_date = :visitDate",
+            params,
+            new JdbcVisitRowMapperExt());
+    }
+
+    protected class JdbcVisitRowMapperExt implements RowMapper<Visit> {
 
 		@Override
 		public Visit mapRow(ResultSet rs, int rowNum) throws SQLException {

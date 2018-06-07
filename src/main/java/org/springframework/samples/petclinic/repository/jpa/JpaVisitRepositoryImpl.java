@@ -16,6 +16,7 @@
 package org.springframework.samples.petclinic.repository.jpa;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -64,7 +65,7 @@ public class JpaVisitRepositoryImpl implements VisitRepository {
         query.setParameter("id", petId);
         return query.getResultList();
     }
-    
+
 	@Override
 	public Visit findById(int id) throws DataAccessException {
 		return this.em.find(Visit.class, id);
@@ -84,5 +85,10 @@ public class JpaVisitRepositoryImpl implements VisitRepository {
 			em.remove(visit);
 		}
 	}
+
+    @Override
+    public Collection<Visit> findByDate(Date date) {
+        return this.em.createQuery("SELECT v FROM Visit v WHERE v.date = :date").setParameter("date", date).getResultList();
+    }
 
 }
